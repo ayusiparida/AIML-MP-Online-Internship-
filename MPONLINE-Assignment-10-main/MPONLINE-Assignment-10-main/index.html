@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Heart Disease Prediction</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 600px; margin: 40px auto; padding: 0 20px; }
+        h1 { color: #b91c1c; }
+        label { display: block; margin-top: 10px; font-weight: bold; }
+        input { width: 100%; padding: 6px; margin-top: 4px; box-sizing: border-box; }
+        button { margin-top: 20px; padding: 10px 20px; background: #b91c1c; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        #result { margin-top: 20px; padding: 12px; border-radius: 4px; display: none; }
+    </style>
+</head>
+<body>
+    <h1>Heart Disease Prediction API</h1>
+    <p>This is a simple demo form that calls the <code>/predict</code> endpoint.
+       You can also POST JSON directly to <code>/predict</code>.</p>
+
+    <form id="predictForm">
+        {% for f in features %}
+        <label for="{{ f }}">{{ f }}</label>
+        <input type="number" step="any" id="{{ f }}" name="{{ f }}" required>
+        {% endfor %}
+        <button type="submit">Predict</button>
+    </form>
+
+    <div id="result"></div>
+
+    <script>
+        document.getElementById("predictForm").addEventListener("submit", async function (e) {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const payload = {};
+            for (const [key, value] of formData.entries()) {
+                payload[key] = parseFloat(value);
+            }
+            const res = await fetch("/predict", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload),
+            });
+            const data = await res.json();
+            const resultDiv = document.getElementById("result");
+            resultDiv.style.display = "block";
+            resultDiv.style.background = data.prediction_label === 1 ? "#fee2e2" : "#dcfce7";
+            resultDiv.textContent = data.prediction || data.error;
+        });
+    </script>
+</body>
+</html>
